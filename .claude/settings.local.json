@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make clean *)",
+      "Bash(make)",
+      "Bash(./dungeon_explorer)",
+      "Read(//home/user/.claude/projects/-mnt-c-Users-user-COS_prac/memory/**)",
+      "Bash(ls MEMORY.md)",
+      "Bash(explorer.exe \"assets/map.png\")",
+      "Bash(echo \"explorer.exe exit: $?\")",
+      "Bash(python3 -)"
+    ]
+  }
+}
