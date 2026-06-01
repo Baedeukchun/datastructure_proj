@@ -568,10 +568,13 @@ void Game::runEncounter() {
         monster->markDefeated();
         int reward = monster->getRewardScore();
         player.addScore(reward);
-        std::cout << "You cleared the challenge! +" << reward << " score.\n";
+        if (monster->getMission() != MissionType::FinalQuiz) {
+            std::cout << "You cleared the challenge! +" << reward << " score.\n";
+        }
         dropMissionRewards(monster->getMission());
         if (monster->getMission() == MissionType::FinalQuiz) {
             gameCleared = true;
+            std::cout << "+" << reward << " score.\n";
             std::cout << "\n*** You completed the final mission. ***\n";
             // Convert any Hearts left standing into score.
             int hpBonus = player.getHp() * HEART_SCORE;
@@ -581,7 +584,11 @@ void Game::runEncounter() {
         }
     } else {
         player.loseHeart();
-        std::cout << "You lost the challenge. -1 Heart.\n";
+        if (monster->getMission() != MissionType::FinalQuiz) {
+            std::cout << "You lost the challenge. -1 Heart.\n";
+        } else {
+            std::cout << "-1 Heart.\n";
+        }
         if (!player.isAlive()) {
             std::cout << "You have run out of Hearts...\n";
         }
@@ -624,20 +631,37 @@ bool Game::runEnglishDefinition() {
 }
 
 bool Game::runKentechQuiz() {
-    std::cout << "Final mission: answer a question about KENTECH to leave!\n";
-    static const ChoiceQuestion pool[] = {
-        {"What does 'KENTECH' stand for?",
-         {"Korea Institute of Energy Technology",
-          "Kentucky Engineering Tech",
-          "Korea Engineering & Technology College"}, '1'},
-        {"KENTECH is a university specialized in which field?",
-         {"Medicine", "Energy", "Law"}, '2'},
-        {"In which city is KENTECH located?",
-         {"Seoul", "Busan", "Naju"}, '3'},
-        {"Which global challenge is central to KENTECH's mission?",
-         {"Energy and climate", "Space exploration", "Marine biology"}, '1'},
-    };
-    return askChoice(pool, (int)(sizeof(pool) / sizeof(pool[0])));
+    const int answer = pickIndex(50) + 1;
+    std::cout << "Final mission: 1부터 50까지 숫자 중 하나를 맞혀 보세요!\n"
+              << "기회는 총 5번입니다.\n";
+
+    for (int attempt = 1; attempt <= 5; ++attempt) {
+        std::cout << "Guess " << attempt << "/5: ";
+        std::string line;
+        std::getline(std::cin, line);
+        line = trim(line);
+
+        int guess = 0;
+        std::istringstream iss(line);
+        if (!(iss >> guess) || guess < 1 || guess > 50) {
+            std::cout << "1부터 50까지의 숫자를 입력해주세요.\n";
+            --attempt;
+            continue;
+        }
+
+        if (guess == answer) {
+            std::cout << "안전하게 좌석 02에 탑승했습니다! 축하해요~ Home sweet Home ╰(*°▽°*)╯\n";
+            return true;
+        }
+        if (guess < answer) {
+            std::cout << "떙@@!@!!! 낮습니다! 좀 더 높여보세요~\n";
+        } else {
+            std::cout << "떙! 높습니다!! 낮춰주세요 ~~\n";
+        }
+    }
+
+    std::cout << "좌석 02가 떠나갔습니다.. 다시 도전하세요 ㅠㅡㅠ\n";
+    return false;
 }
 
 // Show the target text and read one line back, timing how long it took.
